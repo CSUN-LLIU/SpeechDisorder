@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <in.goodiebag.carouselpicker.CarouselPicker
+        android:id="@+id/vowels_picker"
+        android:layout_width="395dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        android:visibility="visible"
+        app:items_visible="three"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.luanta.testspeechui.GoalProgressBar
+        android:id="@+id/progressBarF1"
+        android:layout_width="395dp"
+        android:layout_height="19dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:barThickness="4dp"
+        app:goalIndicatorHeight="16dp"
+        app:goalIndicatorThickness="4dp"
+        app:goalNotReachedColor="@color/dark_gray"
+        app:goalReachedColor="@color/green"
+        app:indicatorType="square"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/animation"
+        app:unfilledSectionColor="@color/gray" />
+
+    <com.luanta.testspeechui.GoalProgressBar
+        android:id="@+id/progressBarF2"
+        android:layout_width="395dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:barThickness="4dp"
+        app:goalIndicatorHeight="16dp"
+        app:goalIndicatorThickness="4dp"
+        app:goalNotReachedColor="@color/dark_gray"
+        app:goalReachedColor="@color/green"
+        app:indicatorType="square"
+        app:layout_constraintBottom_toTopOf="@+id/bt_record"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progressBarF1"
+        app:unfilledSectionColor="@color/gray" />
+
+    <ImageButton
+        android:id="@+id/bt_record"
+        android:layout_width="88dp"
+        android:layout_height="88dp"
+        android:backgroundTint="@android:color/transparent"
+        android:onClick="record"
+        app:layout_constraintBottom_toBottomOf="@+id/bt_listen"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/sound_recorder_icon" />
+
+    <ImageButton
+        android:id="@+id/bt_listen"
+        android:layout_width="88dp"
+        android:layout_height="88dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/bt_record"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/sound_on_icon" />
+
+    <ImageView
+        android:id="@+id/animation"
+        android:layout_width="393dp"
+        android:layout_height="281dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vowels_picker"
+         />
+
+    <ImageButton
+        android:id="@+id/start_Anim"
+        android:layout_width="77dp"
+        android:layout_height="86dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/bt_record"
+        app:srcCompat="@drawable/anim_btn_image"
+        android:onClick="startAnim"/>
+
+</android.support.constraint.ConstraintLayout>
