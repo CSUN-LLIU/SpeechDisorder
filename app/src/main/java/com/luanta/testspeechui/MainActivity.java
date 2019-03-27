@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
             testAnimation.stop();
         }
         testAnimation.start();
-        Toast.makeText(this, "Visual feedback is playing...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Playing visual feedback...", Toast.LENGTH_SHORT).show();
     }
 
     private void onRecord(boolean start) {
@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
         if (start) {
             startRecording();
 //            resetProgress();
-            Toast.makeText(this, "Recording...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Recording...Tap to stop", Toast.LENGTH_SHORT).show();
         } else {
             resetProgress();
             stopRecording();
