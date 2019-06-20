@@ -45,10 +45,12 @@ public class MainActivity extends AppCompatActivity {
     MediaPlayer mp;
     //Uri uri;
 //    String uriParse = "";
-    GoalProgressBar progressBarF1;
-    GoalProgressBar progressBarF2;
-    int progF1;
-    int progF2;
+//    GoalProgressBar progressBarF1;
+//    GoalProgressBar progressBarF2;
+    GoalProgressBar progressBarF1F2;
+//    int progF1;
+//    int progF2;
+    int progF1F2;
     int F1, F2;
     ImageView imageView;
     AnimationDrawable testAnimation;
@@ -113,11 +115,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        progressBarF1 = findViewById(R.id.progressBarF1);
-        progressBarF2 = findViewById(R.id.progressBarF2);
+        /*progressBarF1 = findViewById(R.id.progressBarF1);
+        progressBarF2 = findViewById(R.id.progressBarF2);*/
 
-        progressBarF1.setGoal(50); // TODO: set to 50
-        progressBarF2.setGoal(50); // TODO: set to 50
+        progressBarF1F2 = findViewById(R.id.progressBarF1F2);
+
+        /*progressBarF1.setGoal(50); // TODO: set to 50
+        progressBarF2.setGoal(50); // TODO: set to 50*/
+
+        progressBarF1F2.setGoal(80);
 
         if (savedInstanceState == null) {
             resetProgress();
@@ -222,8 +228,10 @@ public class MainActivity extends AppCompatActivity {
 
     // TODO: calculate progF1, progF2 based on F1, F2 value
     public void resetProgress() {
-        progressBarF1.setProgress(progF1);
-        progressBarF2.setProgress(progF2);
+        /*progressBarF1.setProgress(progF1);
+        progressBarF2.setProgress(progF2);*/
+
+        progressBarF1F2.setProgress(progF1F2);
     }
 
     @Override
@@ -440,7 +448,7 @@ public class MainActivity extends AppCompatActivity {
 
         int deltaF1 = 100 * (F1 - maleF1[picked_vowel]) / maleF1[picked_vowel];
 
-        if (Math.abs(deltaF1) <= 5) {
+        /*if (Math.abs(deltaF1) <= 5) {
             progF1 = 50;
         } else if (Math.abs(deltaF1) <= 10) {
             if (deltaF1 > 0) progF1 = 60;
@@ -448,11 +456,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             if (deltaF1 > 0) progF1 = 75;
             else progF1 = 25;
-        }
+        }*/
 
         int deltaF2 = 100 * (F2 - maleF2[picked_vowel]) / maleF2[picked_vowel];
 
-        if (Math.abs(deltaF2) <= 5) {
+        /*if (Math.abs(deltaF2) <= 5) {
             progF2 = 50;
         } else if (Math.abs(deltaF2) <= 10) {
             if (deltaF2 > 0) progF2 = 60;
@@ -460,7 +468,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             if (deltaF2 > 0) progF2 = 75;
             else progF2 = 25;
-        }
+        }*/
+
+        progF1F2 = 100 - (Math.abs(deltaF1) + Math.abs(deltaF2))/2;
 
     }
 
