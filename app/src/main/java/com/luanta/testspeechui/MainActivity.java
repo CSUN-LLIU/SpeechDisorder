@@ -61,8 +61,15 @@ public class MainActivity extends AppCompatActivity {
     private AudioRecord audioRecord = null;
     private ImageButton recordButton;
     // reference Formants
-    private int[] femaleF1 = {437, 487, 536, 731, 669, 459, 519, 555, 781, 936, 753, 532};
-    private int[] femaleF2 = {2761, 2365, 2530, 2058, 2349, 1105, 1125, 1035, 1136, 1151, 1426, 1588};
+    // TODO: add male and child reference Formants data
+    /*private int[] childF1 = {452, 511, 564, 749, 717, 494, 568, 597, 803, 1002, 749, 586};
+    private int[] childF2 = {3081, 2552, 2656, 2267, 2501, 1345, 1490, 1137, 1210, 1688, 1546, 1719};*/
+
+    /*private int[] femaleF1 = {437, 487, 536, 731, 669, 459, 519, 555, 781, 936, 753, 532};
+    private int[] femaleF2 = {2761, 2365, 2530, 2058, 2349, 1105, 1125, 1035, 1136, 1151, 1426, 1588};*/
+
+    private int[] maleF1 = {342, 427, 476, 580, 588, 378, 469, 497, 652, 768, 623, 474};
+    private int[] maleF2 = {2322, 2034, 2089, 1799, 1952, 997, 1122, 910, 997, 1333, 1200, 1379};
 //    private String[] hints = {"FRONT", "BACK", "MIDDLE", "CLOSE/HIGH", "OPEN/LOW"};
 //    private String hint = "";
 
@@ -150,16 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-//                tvSelected.setText("Selected item in image carousel is  : "+position);
                 picked_vowel = position;
-//
-//                if(position <= 4) {
-//                    hint = "FRONT";
-//                }
-//                else if (position <= 7) {
-//                    hint = "MIDDLE";
-//                }
-//                else hint = "BACK";
             }
 
             @Override
@@ -440,7 +438,7 @@ public class MainActivity extends AppCompatActivity {
         F1 = list.get(0) * 2;
         F2 = list.get(1) * 2;
 
-        int deltaF1 = 100 * (F1 - femaleF1[picked_vowel]) / femaleF1[picked_vowel];
+        int deltaF1 = 100 * (F1 - maleF1[picked_vowel]) / maleF1[picked_vowel];
 
         if (Math.abs(deltaF1) <= 5) {
             progF1 = 50;
@@ -452,7 +450,7 @@ public class MainActivity extends AppCompatActivity {
             else progF1 = 25;
         }
 
-        int deltaF2 = 100 * (F2 - femaleF2[picked_vowel]) / femaleF2[picked_vowel];
+        int deltaF2 = 100 * (F2 - maleF2[picked_vowel]) / maleF2[picked_vowel];
 
         if (Math.abs(deltaF2) <= 5) {
             progF2 = 50;
@@ -465,6 +463,5 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
 
 }
