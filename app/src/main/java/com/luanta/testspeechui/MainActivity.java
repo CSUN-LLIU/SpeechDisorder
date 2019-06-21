@@ -64,14 +64,15 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton recordButton;
     // reference Formants
     // TODO: add male and child reference Formants data
-    /*private int[] childF1 = {452, 511, 564, 749, 717, 494, 568, 597, 803, 1002, 749, 586};
-    private int[] childF2 = {3081, 2552, 2656, 2267, 2501, 1345, 1490, 1137, 1210, 1688, 1546, 1719};*/
+    // /i/, /ɪ/, /e/, /ɛ/, /æ/, /ʌ/, /ɝ/, /u/, /ʊ/, /o/, /ɔ/, /ɑ/
+    /*private int[] childF1 = {452, 511, 564, 749, 717, 749, 586, 494, 568, 597, 803, 1002};
+    private int[] childF2 = {3081, 2552, 2656, 2267, 2501, 1546, 1719, 1345, 1490, 1137, 1210, 1688};*/
 
-    /*private int[] femaleF1 = {437, 487, 536, 731, 669, 459, 519, 555, 781, 936, 753, 532};
-    private int[] femaleF2 = {2761, 2365, 2530, 2058, 2349, 1105, 1125, 1035, 1136, 1151, 1426, 1588};*/
+    /*private int[] femaleF1 = {437, 487, 536, 731, 669, 753, 532, 459, 519, 555, 781, 936};
+    private int[] femaleF2 = {2761, 2365, 2530, 2058, 2349, 1426, 1588, 1105, 1125, 1035, 1136, 1151};*/
 
-    private int[] maleF1 = {342, 427, 476, 580, 588, 378, 469, 497, 652, 768, 623, 474};
-    private int[] maleF2 = {2322, 2034, 2089, 1799, 1952, 997, 1122, 910, 997, 1333, 1200, 1379};
+    private int[] maleF1 = {342, 427, 476, 580, 588, 623, 474, 378, 469, 497, 652, 768};
+    private int[] maleF2 = {2322, 2034, 2089, 1799, 1952, 1200, 1379, 997, 1122, 910, 997, 1333};
 //    private String[] hints = {"FRONT", "BACK", "MIDDLE", "CLOSE/HIGH", "OPEN/LOW"};
 //    private String hint = "";
 
@@ -138,18 +139,18 @@ public class MainActivity extends AppCompatActivity {
 
 // Case 1 : To populate the picker with images
         List<CarouselPicker.PickerItem> imageItems = new ArrayList<>();
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_fr1_long_i));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_fr2_short_i));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_fr3_single_a));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_fr4_ae));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_fr5_single_e));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_fr6_epsilon));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_ct1_revert_e));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_ct2_revert_v));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_bk1_long_o));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_bk2_long_u));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_bk3_short_o));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_bk4_short_u));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v1_fr1_long_i_eat));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v2_fr2_short_i_pin));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v3_fr3_e_eight));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v4_fr4_epsilon_bed));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v5_fr5_ae_at));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v6_ct1_inv_v_sun));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v7_ct2_inv_epsilon_bird));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v8_bk1_u_drew));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v9_bk2_inv_omega_foot));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v10_bk3_o_both));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v11_bk4_inv_c_jaw));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v12_bk5_short_o_clock));
 //Create an adapter
         CarouselPicker.CarouselViewAdapter imageAdapter = new CarouselPicker.CarouselViewAdapter(this, imageItems, 0);
 //Set the adapter
@@ -177,6 +178,49 @@ public class MainActivity extends AppCompatActivity {
 
     public void startAnim(View view) {
 //        imageView.setVisibility(View.VISIBLE);
+        //TODO: Switch animations based on current selected sound
+/*
+
+        switch (picked_vowel) {
+            case 0:
+                mp = MediaPlayer.create(this, R.raw.v_fr1_long_i);
+                break;
+            case 1:
+                mp = MediaPlayer.create(this, R.raw.v_fr2_short_i);
+                break;
+            case 2:
+                mp = MediaPlayer.create(this, R.raw.v_fr3_single_a);
+                break;
+            case 3:
+                mp = MediaPlayer.create(this, R.raw.v_fr4_ae);
+                break;
+            case 4:
+                mp = MediaPlayer.create(this, R.raw.v_fr5_single_e);
+                break;
+            case 5:
+                mp = MediaPlayer.create(this, R.raw.v_fr6_epsilon);
+                break;
+            case 6:
+                mp = MediaPlayer.create(this, R.raw.v_bk4_short_u);
+                break;
+            case 7:
+                mp = MediaPlayer.create(this, R.raw.v_ct2_revert_v);
+                break;
+            case 8:
+                mp = MediaPlayer.create(this, R.raw.v_bk1_long_o);
+                break;
+            case 9:
+                mp = MediaPlayer.create(this, R.raw.v_bk2_long_u);
+                break;
+            case 10:
+                mp = MediaPlayer.create(this, R.raw.v_bk3_short_o);
+                break;
+            case 11:
+                mp = MediaPlayer.create(this, R.raw.v_bk4_short_u);
+                break;
+        }
+*/
+
         if (testAnimation.isRunning()) {
             testAnimation.stop();
         }
@@ -244,43 +288,42 @@ public class MainActivity extends AppCompatActivity {
 
         switch (picked_vowel) {
             case 0:
-                mp = MediaPlayer.create(this, R.raw.v_fr1_long_i);
+                mp = MediaPlayer.create(this, R.raw.v1_fr1_long_i_eat);
                 break;
             case 1:
-                mp = MediaPlayer.create(this, R.raw.v_fr2_short_i);
+                mp = MediaPlayer.create(this, R.raw.v2_fr2_short_i_pin);
                 break;
             case 2:
-                mp = MediaPlayer.create(this, R.raw.v_fr3_single_a);
+                mp = MediaPlayer.create(this, R.raw.v3_fr3_e_eight);
                 break;
             case 3:
-                mp = MediaPlayer.create(this, R.raw.v_fr4_ae);
+                mp = MediaPlayer.create(this, R.raw.v4_fr4_epsilon_bed);
                 break;
             case 4:
-                mp = MediaPlayer.create(this, R.raw.v_fr5_single_e);
+                mp = MediaPlayer.create(this, R.raw.v5_fr5_ae_at);
                 break;
             case 5:
-                mp = MediaPlayer.create(this, R.raw.v_fr6_epsilon);
+                mp = MediaPlayer.create(this, R.raw.v6_ct1_inv_v_sun);
                 break;
             case 6:
-                mp = MediaPlayer.create(this, R.raw.v_bk4_short_u);
+                mp = MediaPlayer.create(this, R.raw.v7_ct2_inv_epsilon_bird);
                 break;
             case 7:
-                mp = MediaPlayer.create(this, R.raw.v_ct2_revert_v);
+                mp = MediaPlayer.create(this, R.raw.v8_bk1_u_drew);
                 break;
             case 8:
-                mp = MediaPlayer.create(this, R.raw.v_bk1_long_o);
+                mp = MediaPlayer.create(this, R.raw.v9_bk2_inv_omega_foot);
                 break;
             case 9:
-                mp = MediaPlayer.create(this, R.raw.v_bk2_long_u);
+                mp = MediaPlayer.create(this, R.raw.v10_bk3_o_both);
                 break;
             case 10:
-                mp = MediaPlayer.create(this, R.raw.v_bk3_short_o);
+                mp = MediaPlayer.create(this, R.raw.v11_bk4_inv_c_jaw);
                 break;
             case 11:
-                mp = MediaPlayer.create(this, R.raw.v_bk4_short_u);
+                mp = MediaPlayer.create(this, R.raw.v12_bk5_short_o_clock);
                 break;
         }
-
 
         try {
             //mp.setDataSource(path + File.separator + fileName);
