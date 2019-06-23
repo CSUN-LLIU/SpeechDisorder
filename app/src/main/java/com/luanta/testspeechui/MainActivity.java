@@ -9,12 +9,12 @@ import android.media.AudioRecord;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -24,10 +24,13 @@ import org.jtransforms.fft.FloatFFT_1D;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import in.goodiebag.carouselpicker.CarouselPicker;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "Formant";
 
     // Requesting permission to RECORD_AUDIO
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
@@ -38,17 +41,19 @@ public class MainActivity extends AppCompatActivity {
     private static final int BUFFER_SIZE = 2 * AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_MASK, ENCODING);
     private static final int RECORD_TIME = 1; // in seconds
     public float[] audioData;
-    public float[] magnitudes;
-    public ArrayList<Integer> peakIndexes;
+//    public float[] magnitudes;
+//    public ArrayList<Integer> peakIndexes;
     CarouselPicker carouselPicker;// = (CarouselPicker) findViewById(R.id.vowels_picker);
     int picked_vowel = 0;
     MediaPlayer mp;
     //Uri uri;
 //    String uriParse = "";
-    GoalProgressBar progressBarF1;
-    GoalProgressBar progressBarF2;
-    int progF1;
-    int progF2;
+//    GoalProgressBar progressBarF1;
+//    GoalProgressBar progressBarF2;
+    GoalProgressBar progressBarF1F2;
+//    int progF1;
+//    int progF2;
+    int progF1F2;
     int F1, F2;
     ImageView imageView;
     AnimationDrawable testAnimation;
@@ -62,14 +67,15 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton recordButton;
     // reference Formants
     // TODO: add male and child reference Formants data
-    /*private int[] childF1 = {452, 511, 564, 749, 717, 494, 568, 597, 803, 1002, 749, 586};
-    private int[] childF2 = {3081, 2552, 2656, 2267, 2501, 1345, 1490, 1137, 1210, 1688, 1546, 1719};*/
+    // /i/, /ɪ/, /e/, /ɛ/, /æ/, /ʌ/, /ɝ/, /u/, /ʊ/, /o/, /ɔ/, /ɑ/
+    /*private int[] childF1 = {452, 511, 564, 749, 717, 749, 586, 494, 568, 597, 803, 1002};
+    private int[] childF2 = {3081, 2552, 2656, 2267, 2501, 1546, 1719, 1345, 1490, 1137, 1210, 1688};*/
 
-    /*private int[] femaleF1 = {437, 487, 536, 731, 669, 459, 519, 555, 781, 936, 753, 532};
-    private int[] femaleF2 = {2761, 2365, 2530, 2058, 2349, 1105, 1125, 1035, 1136, 1151, 1426, 1588};*/
+    /*private int[] femaleF1 = {437, 487, 536, 731, 669, 753, 532, 459, 519, 555, 781, 936};
+    private int[] femaleF2 = {2761, 2365, 2530, 2058, 2349, 1426, 1588, 1105, 1125, 1035, 1136, 1151};*/
 
-    private int[] maleF1 = {342, 427, 476, 580, 588, 378, 469, 497, 652, 768, 623, 474};
-    private int[] maleF2 = {2322, 2034, 2089, 1799, 1952, 997, 1122, 910, 997, 1333, 1200, 1379};
+    private int[] maleF1 = {342, 427, 476, 580, 588, 623, 474, 378, 469, 497, 652, 768};
+    private int[] maleF2 = {2322, 2034, 2089, 1799, 1952, 1200, 1379, 997, 1122, 910, 997, 1333};
 //    private String[] hints = {"FRONT", "BACK", "MIDDLE", "CLOSE/HIGH", "OPEN/LOW"};
 //    private String hint = "";
 
@@ -97,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.animation);
         if (imageView == null) throw new AssertionError();
 
-        imageView.setBackgroundResource(R.drawable.test_animation);
+        imageView.setBackgroundResource(R.drawable.anim_v1);
 
         testAnimation = (AnimationDrawable) imageView.getBackground();
 
@@ -113,11 +119,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        progressBarF1 = findViewById(R.id.progressBarF1);
-        progressBarF2 = findViewById(R.id.progressBarF2);
+        /*progressBarF1 = findViewById(R.id.progressBarF1);
+        progressBarF2 = findViewById(R.id.progressBarF2);*/
 
-        progressBarF1.setGoal(50); // TODO: set to 50
-        progressBarF2.setGoal(50); // TODO: set to 50
+        progressBarF1F2 = findViewById(R.id.progressBarF1F2);
+
+        /*progressBarF1.setGoal(50); // TODO: set to 50
+        progressBarF2.setGoal(50); // TODO: set to 50*/
+
+        progressBarF1F2.setGoal(80);
 
         if (savedInstanceState == null) {
             resetProgress();
@@ -132,18 +142,18 @@ public class MainActivity extends AppCompatActivity {
 
 // Case 1 : To populate the picker with images
         List<CarouselPicker.PickerItem> imageItems = new ArrayList<>();
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_fr1_long_i));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_fr2_short_i));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_fr3_single_a));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_fr4_ae));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_fr5_single_e));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_fr6_epsilon));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_ct1_revert_e));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_ct2_revert_v));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_bk1_long_o));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_bk2_long_u));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_bk3_short_o));
-        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v_bk4_short_u));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v1_fr1_long_i_eat));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v2_fr2_short_i_pin));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v3_fr3_e_eight));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v4_fr4_epsilon_bed));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v5_fr5_ae_at));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v6_ct1_inv_v_sun));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v7_ct2_inv_epsilon_bird));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v8_bk1_u_drew));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v9_bk2_inv_omega_foot));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v10_bk3_o_both));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v11_bk4_inv_c_jaw));
+        imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v12_bk5_short_o_clock));
 //Create an adapter
         CarouselPicker.CarouselViewAdapter imageAdapter = new CarouselPicker.CarouselViewAdapter(this, imageItems, 0);
 //Set the adapter
@@ -171,11 +181,62 @@ public class MainActivity extends AppCompatActivity {
 
     public void startAnim(View view) {
 //        imageView.setVisibility(View.VISIBLE);
+        //TODO: Switch animations based on current selected sound
+        getAnimation();
+
         if (testAnimation.isRunning()) {
             testAnimation.stop();
         }
         testAnimation.start();
         Toast.makeText(this, "Playing visual feedback...", Toast.LENGTH_SHORT).show();
+    }
+
+    private void getAnimation() {
+
+        switch (picked_vowel) {
+            case 0:
+                imageView.setBackgroundResource(R.drawable.anim_v1);
+                break;
+            case 1:
+                imageView.setBackgroundResource(R.drawable.anim_v2);
+                break;
+            case 2:
+                imageView.setBackgroundResource(R.drawable.anim_v3);
+                break;
+            case 3:
+                imageView.setBackgroundResource(R.drawable.anim_v4);
+                break;
+            case 4:
+                imageView.setBackgroundResource(R.drawable.anim_v5);
+                break;
+            case 5:
+                imageView.setBackgroundResource(R.drawable.anim_v6);
+                break;
+            case 6:
+                imageView.setBackgroundResource(R.drawable.anim_v7);
+                break;
+            case 7:
+                imageView.setBackgroundResource(R.drawable.anim_v8);
+                break;
+            case 8:
+                imageView.setBackgroundResource(R.drawable.anim_v9);
+                break;
+            case 9:
+                imageView.setBackgroundResource(R.drawable.anim_v10);
+                break;
+            case 10:
+                imageView.setBackgroundResource(R.drawable.anim_v11);
+                break;
+            case 11:
+                imageView.setBackgroundResource(R.drawable.anim_v12);
+                break;
+        }
+//        imageView.setBackgroundResource(R.drawable.test_animation);
+
+        testAnimation = (AnimationDrawable) imageView.getBackground();
+
+        testAnimation.setOneShot(true);
+
     }
 
     private void onRecord(boolean start) {
@@ -222,8 +283,10 @@ public class MainActivity extends AppCompatActivity {
 
     // TODO: calculate progF1, progF2 based on F1, F2 value
     public void resetProgress() {
-        progressBarF1.setProgress(progF1);
-        progressBarF2.setProgress(progF2);
+        /*progressBarF1.setProgress(progF1);
+        progressBarF2.setProgress(progF2);*/
+
+        progressBarF1F2.setProgress(progF1F2);
     }
 
     @Override
@@ -236,43 +299,42 @@ public class MainActivity extends AppCompatActivity {
 
         switch (picked_vowel) {
             case 0:
-                mp = MediaPlayer.create(this, R.raw.v_fr1_long_i);
+                mp = MediaPlayer.create(this, R.raw.v1_fr1_long_i_eat);
                 break;
             case 1:
-                mp = MediaPlayer.create(this, R.raw.v_fr2_short_i);
+                mp = MediaPlayer.create(this, R.raw.v2_fr2_short_i_pin);
                 break;
             case 2:
-                mp = MediaPlayer.create(this, R.raw.v_fr3_single_a);
+                mp = MediaPlayer.create(this, R.raw.v3_fr3_e_eight);
                 break;
             case 3:
-                mp = MediaPlayer.create(this, R.raw.v_fr4_ae);
+                mp = MediaPlayer.create(this, R.raw.v4_fr4_epsilon_bed);
                 break;
             case 4:
-                mp = MediaPlayer.create(this, R.raw.v_fr5_single_e);
+                mp = MediaPlayer.create(this, R.raw.v5_fr5_ae_at);
                 break;
             case 5:
-                mp = MediaPlayer.create(this, R.raw.v_fr6_epsilon);
+                mp = MediaPlayer.create(this, R.raw.v6_ct1_inv_v_sun);
                 break;
             case 6:
-                mp = MediaPlayer.create(this, R.raw.v_bk4_short_u);
+                mp = MediaPlayer.create(this, R.raw.v7_ct2_inv_epsilon_bird);
                 break;
             case 7:
-                mp = MediaPlayer.create(this, R.raw.v_ct2_revert_v);
+                mp = MediaPlayer.create(this, R.raw.v8_bk1_u_drew);
                 break;
             case 8:
-                mp = MediaPlayer.create(this, R.raw.v_bk1_long_o);
+                mp = MediaPlayer.create(this, R.raw.v9_bk2_inv_omega_foot);
                 break;
             case 9:
-                mp = MediaPlayer.create(this, R.raw.v_bk2_long_u);
+                mp = MediaPlayer.create(this, R.raw.v10_bk3_o_both);
                 break;
             case 10:
-                mp = MediaPlayer.create(this, R.raw.v_bk3_short_o);
+                mp = MediaPlayer.create(this, R.raw.v11_bk4_inv_c_jaw);
                 break;
             case 11:
-                mp = MediaPlayer.create(this, R.raw.v_bk4_short_u);
+                mp = MediaPlayer.create(this, R.raw.v12_bk5_short_o_clock);
                 break;
         }
-
 
         try {
             //mp.setDataSource(path + File.separator + fileName);
@@ -288,6 +350,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /* begin public void startRecording() { */
+    //TODO: Auto detect speech signal for START/ STOP recording
     public void startRecording() {
 
         audioData = new float[SAMPLE_RATE * RECORD_TIME];
@@ -323,6 +386,8 @@ public class MainActivity extends AppCompatActivity {
                     continueParsing = true;
                 }
 
+//                generateGraphData(audioData.clone());
+
                 audioRecord.stop();
                 audioRecord.release();
                 audioRecord = null;
@@ -330,7 +395,6 @@ public class MainActivity extends AppCompatActivity {
         });//.start();
 
         startThread.start();
-
     }
     /* end public void startRecording() { */
 
@@ -343,14 +407,14 @@ public class MainActivity extends AppCompatActivity {
 
                 final float[] magnitude = calculateFFT(data);
                 final ArrayList<Integer> peakIndex = calculatePeaks(magnitude, 500);
-                magnitudes = magnitude;
-                peakIndexes = peakIndex;
+//                magnitudes = magnitude;
+//                peakIndexes = peakIndex;
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        //m(magnitude.clone(), (ArrayList<Integer>) peakIndex.clone());
-                        m((ArrayList<Integer>) peakIndex.clone());
+                        //displayF1F2(magnitude.clone(), (ArrayList<Integer>) peakIndex.clone());
+                        displayF1F2((ArrayList<Integer>) peakIndex.clone());
                     }
                 });
 
@@ -378,12 +442,13 @@ public class MainActivity extends AppCompatActivity {
     }
     /* end public float[] calculateFFT(float[] audioData) { */
 
-    /* begin private void m(float[] magnitude, ArrayList<Integer> peaks) { */
-//    private void m(float[] magnitude, ArrayList<Integer> peaks) {
-    private void m(ArrayList<Integer> peaks) {
+    /* begin private void displayF1F2(float[] magnitude, ArrayList<Integer> peaks) { */
+//    private void displayF1F2(float[] magnitude, ArrayList<Integer> peaks) {
+    private void displayF1F2(ArrayList<Integer> peaks) {
 
         setCurrentF(peaks); // TODO: replace with calculate F1, F2 for progressBar inputs
 
+        /*
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -391,9 +456,9 @@ public class MainActivity extends AppCompatActivity {
                 continueParsing = false;
             }
         }, 1000);
-
+*/
     }
-    /* end private void m(float[] magnitude, ArrayList<Integer> peaks) { */
+    /* end private void displayF1F2(float[] magnitude, ArrayList<Integer> peaks) { */
 
     /* begin public ArrayList<Integer> calculatePeaks(float[] magnitudes, int minimumDistance) { */
     public ArrayList<Integer> calculatePeaks(float[] magnitudes, int minimumDistance) {
@@ -422,7 +487,8 @@ public class MainActivity extends AppCompatActivity {
                 lastPeakIndex = frequencyBin;
             }
 
-            while (frequencyBin < magnitudes.length - 1 && magnitudes[frequencyBin + 1] <= max) {
+            //while (frequencyBin < magnitudes.length - 1 && magnitudes[frequencyBin + 1] <= max) {
+            while (frequencyBin < magnitudes.length - 1 && magnitudes[frequencyBin + 1] < max) {
                 frequencyBin++;
                 max = magnitudes[frequencyBin];
             }
@@ -440,27 +506,22 @@ public class MainActivity extends AppCompatActivity {
 
         int deltaF1 = 100 * (F1 - maleF1[picked_vowel]) / maleF1[picked_vowel];
 
-        if (Math.abs(deltaF1) <= 5) {
-            progF1 = 50;
-        } else if (Math.abs(deltaF1) <= 10) {
-            if (deltaF1 > 0) progF1 = 60;
-            else progF1 = 40;
-        } else {
-            if (deltaF1 > 0) progF1 = 75;
-            else progF1 = 25;
-        }
-
         int deltaF2 = 100 * (F2 - maleF2[picked_vowel]) / maleF2[picked_vowel];
 
-        if (Math.abs(deltaF2) <= 5) {
-            progF2 = 50;
-        } else if (Math.abs(deltaF2) <= 10) {
-            if (deltaF2 > 0) progF2 = 60;
-            else progF2 = 40;
-        } else {
-            if (deltaF2 > 0) progF2 = 75;
-            else progF2 = 25;
+        int scoreF1F2 = 100 - (Math.abs(deltaF1) + Math.abs(deltaF2))/2;
+
+        if(scoreF1F2 < 0) {
+            Random rd = new Random();
+            progF1F2 = 1 + rd.nextInt(5);
         }
+        else progF1F2 = scoreF1F2;
+
+//        progF1F2 = 100 - (Math.abs(deltaF1) + Math.abs(deltaF2))/2;
+
+        Log.i(TAG,"F1: " + F1);
+        Log.i(TAG,"F2: " + F2);
+        Log.i(TAG,"scoreF1F2: " + scoreF1F2);
+        Log.i(TAG,"progF1F2: " + progF1F2);
 
     }
 
