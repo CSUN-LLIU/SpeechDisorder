@@ -14,7 +14,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -68,14 +71,17 @@ public class MainActivity extends AppCompatActivity {
     // reference Formants
     // TODO: add male and child reference Formants data
     // /i/, /ɪ/, /e/, /ɛ/, /æ/, /ʌ/, /ɝ/, /u/, /ʊ/, /o/, /ɔ/, /ɑ/
-    /*private int[] childF1 = {452, 511, 564, 749, 717, 749, 586, 494, 568, 597, 803, 1002};
-    private int[] childF2 = {3081, 2552, 2656, 2267, 2501, 1546, 1719, 1345, 1490, 1137, 1210, 1688};*/
+    private int[] childF1 = {452, 511, 564, 749, 717, 749, 586, 494, 568, 597, 803, 1002};
+    private int[] childF2 = {3081, 2552, 2656, 2267, 2501, 1546, 1719, 1345, 1490, 1137, 1210, 1688};
 
-    /*private int[] femaleF1 = {437, 487, 536, 731, 669, 753, 532, 459, 519, 555, 781, 936};
-    private int[] femaleF2 = {2761, 2365, 2530, 2058, 2349, 1426, 1588, 1105, 1125, 1035, 1136, 1151};*/
+    private int[] femaleF1 = {437, 487, 536, 731, 669, 753, 532, 459, 519, 555, 781, 936};
+    private int[] femaleF2 = {2761, 2365, 2530, 2058, 2349, 1426, 1588, 1105, 1125, 1035, 1136, 1151};
 
     private int[] maleF1 = {342, 427, 476, 580, 588, 623, 474, 378, 469, 497, 652, 768};
     private int[] maleF2 = {2322, 2034, 2089, 1799, 1952, 1200, 1379, 997, 1122, 910, 997, 1333};
+
+    private int[] referenceF1 = femaleF1;
+    private int[] referenceF2 = femaleF2;
 //    private String[] hints = {"FRONT", "BACK", "MIDDLE", "CLOSE/HIGH", "OPEN/LOW"};
 //    private String hint = "";
 
@@ -94,7 +100,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_menu);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
@@ -176,6 +185,41 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.profile_child:
+                referenceF1 = childF1;
+                referenceF2 = childF2;
+                setMenuItemOptionActive(item);
+                return true;
+            case R.id.profile_female:
+                referenceF1 = femaleF1;
+                referenceF2 = femaleF2;
+                setMenuItemOptionActive(item);
+                return true;
+            case R.id.profile_male:
+                referenceF1 = maleF1;
+                referenceF2 = maleF2;
+                setMenuItemOptionActive(item);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void setMenuItemOptionActive(MenuItem item) {
+        if(item.isChecked()) item.setChecked(false);
+        else item.setChecked(true);
     }
 
 
@@ -504,9 +548,9 @@ public class MainActivity extends AppCompatActivity {
         F1 = list.get(0) * 2;
         F2 = list.get(1) * 2;
 
-        int deltaF1 = 100 * (F1 - maleF1[picked_vowel]) / maleF1[picked_vowel];
+        int deltaF1 = 100 * (F1 - referenceF1[picked_vowel]) / referenceF1[picked_vowel];
 
-        int deltaF2 = 100 * (F2 - maleF2[picked_vowel]) / maleF2[picked_vowel];
+        int deltaF2 = 100 * (F2 - referenceF2[picked_vowel]) / referenceF2[picked_vowel];
 
         int scoreF1F2 = 100 - (Math.abs(deltaF1) + Math.abs(deltaF2))/2;
 
