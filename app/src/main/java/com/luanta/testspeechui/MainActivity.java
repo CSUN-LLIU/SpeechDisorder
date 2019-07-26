@@ -11,8 +11,12 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Process;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -31,7 +35,7 @@ import java.util.Random;
 
 import in.goodiebag.carouselpicker.CarouselPicker;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "Formant";
 
@@ -46,20 +50,21 @@ public class MainActivity extends AppCompatActivity {
     public float[] audioData;
 //    public float[] magnitudes;
 //    public ArrayList<Integer> peakIndexes;
-    CarouselPicker carouselPicker;// = (CarouselPicker) findViewById(R.id.vowels_picker);
-    int picked_vowel = 0;
-    MediaPlayer mp;
+    private List<CarouselPicker.PickerItem> imageItems = new ArrayList<>();
+    private CarouselPicker carouselPicker;// = (CarouselPicker) findViewById(R.id.vowels_picker);
+    private int picked_vowel = 0;
+    private MediaPlayer mp;
     //Uri uri;
 //    String uriParse = "";
 //    GoalProgressBar progressBarF1;
 //    GoalProgressBar progressBarF2;
-    GoalProgressBar progressBarF1F2;
+    private GoalProgressBar progressBarF1F2;
 //    int progF1;
 //    int progF2;
-    int progF1F2;
-    int F1, F2;
-    ImageView imageView;
-    AnimationDrawable testAnimation;
+    private int progF1F2;
+    private int F1, F2;
+    private ImageView imageView;
+    private AnimationDrawable testAnimation;
     private boolean permissionToRecordAccepted = false;
     private String[] permissions = {Manifest.permission.RECORD_AUDIO};
     private boolean isStopButtonPressed = false;
@@ -100,10 +105,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_menu);
+//        setContentView(R.layout.app_bar_nav_drawer);
+        setContentView(R.layout.activity_nav_drawer);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+        navigationView.setNavigationItemSelectedListener(this);
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
@@ -150,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
         carouselPicker = (CarouselPicker) findViewById(R.id.vowels_picker);
 
 // Case 1 : To populate the picker with images
-        List<CarouselPicker.PickerItem> imageItems = new ArrayList<>();
+//        List<CarouselPicker.PickerItem> imageItems = new ArrayList<>();
         imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v1_fr1_long_i_eat));
         imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v2_fr2_short_i_pin));
         imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v3_fr3_e_eight));
@@ -187,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // Override this method enable (inflate) display of Menu in Menu bar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -562,11 +577,24 @@ public class MainActivity extends AppCompatActivity {
 
 //        progF1F2 = 100 - (Math.abs(deltaF1) + Math.abs(deltaF2))/2;
 
-        Log.i(TAG,"F1: " + F1);
-        Log.i(TAG,"F2: " + F2);
-        Log.i(TAG,"scoreF1F2: " + scoreF1F2);
-        Log.i(TAG,"progF1F2: " + progF1F2);
+//        Log.i(TAG,"F1: " + F1);
+//        Log.i(TAG,"F2: " + F2);
+//        Log.i(TAG,"scoreF1F2: " + scoreF1F2);
+//        Log.i(TAG,"progF1F2: " + progF1F2);
+        Log.i(TAG,"referenceF1: " + referenceF1[picked_vowel]);
 
     }
 
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        // TODO: implement menuItem selected here
+        int id = menuItem.getItemId();
+        if(id != 0) {
+            Toast.makeText(this, "onNavigationItemSelected...", Toast.LENGTH_SHORT).show();
+        }
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
 }

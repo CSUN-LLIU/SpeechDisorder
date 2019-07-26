@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <item android:title="@string/users">
+        <menu>
+            <item
+                android:id="@+id/nav_select_user"
+                android:icon="@drawable/ic_menu_camera"
+                android:title="@string/menu_select_user" />
+            <item
+                android:id="@+id/nav_new_user"
+                android:icon="@drawable/ic_menu_gallery"
+                android:title="@string/menu_create_user" />
+        </menu>
+    </item>
+
+    <item android:title="@string/lessons">
+        <menu>
+            <item
+                android:id="@+id/nav_select_lesson"
+                android:icon="@drawable/ic_menu_slideshow"
+                android:title="@string/menu_select_lesson" />
+            <item
+                android:id="@+id/nav_create_lesson"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="@string/menu_create_lesson" />
+        </menu>
+    </item>
+
+    <item android:title="@string/history">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="@string/menu_view_history" />
+            <item
+                android:id="@+id/nav_send"
+                android:icon="@drawable/ic_menu_send"
+                android:title="@string/menu_send" />
+        </menu>
+    </item>
+
+</menu>
