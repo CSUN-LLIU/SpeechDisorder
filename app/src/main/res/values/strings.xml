@@ -1,6 +1,24 @@
 <resources>
-    <string name="app_name">Test Speech UI</string>
+    <string name="app_name">Speech BioFeedback</string>
+    <string name="nav_header_title">Speech Visual BioFeedback</string>
+    <string name="nav_header_subtitle">CSUN Fall 2019</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+
     <string name="male">Male</string>
     <string name="female">Female</string>
     <string name="child">Child</string>
+
+    <string name="menu_select_user">Select User</string>
+    <string name="menu_create_user">Create User</string>
+    <string name="menu_select_lesson">Select Lesson</string>
+    <string name="menu_create_lesson">Create Lesson</string>
+    <string name="menu_view_history">View History</string>
+    <string name="menu_send">Send</string>
+
+    <string name="history">History</string>
+    <string name="users">Users</string>
+    <string name="lessons">Lessons</string>
 </resources>

@@ -2,12 +2,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.luanta.testspeechui.MainActivity">
-    <group android:checkableBehavior="single" >
+    <group
+        android:id="@+id/reference_profile"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/profile_child"
             android:title="@string/child" />
         <item
             android:id="@+id/profile_female"
+            android:checked="true"
             android:title="@string/female" />
         <item
             android:id="@+id/profile_male"
