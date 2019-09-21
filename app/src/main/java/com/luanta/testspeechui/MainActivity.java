@@ -1,6 +1,7 @@
 package com.luanta.testspeechui;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.AudioFormat;
@@ -600,7 +601,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // TODO: implement menuItem selected here
         int id = menuItem.getItemId();
         if(id != 0) {
-            Toast.makeText(this, "onNavigationItemSelected...", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "onNavigationItemSelected...", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this,UsersActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
