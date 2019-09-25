@@ -20,7 +20,7 @@ public interface ScoreDao {
     Score[] getAnyScore();
 
     // Get all scores
-    @Query("SELECT * FROM score_table ORDER BY user_id ASC, vowel_id ASC, time_stamp ASC")
+    @Query("SELECT * FROM score_table ORDER BY id ASC")
     LiveData<List<Score>> getAllScores();
 
     // Get all scores for a specific user

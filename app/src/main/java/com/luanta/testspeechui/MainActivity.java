@@ -2,6 +2,7 @@ package com.luanta.testspeechui;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.AudioFormat;
@@ -39,14 +40,23 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import in.goodiebag.carouselpicker.CarouselPicker;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final int SELECT_USER_ACTIVITY_REQUEST_CODE = 1;
-    private int userIdActive;
+    private int mUserIdActive = 2; // default userId
+    private int mProfileActive = 2; // default user profile
+    // Key for current active user & active profile
+    private final String ACTIVE_USER_KEY = "active_user";
+    private final String ACTIVE_PROFILE_KEY = "active_profile";
+    // Shared preferences object
+    private SharedPreferences mPreferences;
+
+    // Name of shared preferences file
+    private String sharedPrefFile = "com.luanta.testspeechui";
+
     private ScoreViewModel mScoreViewModel;
 
     private static final String TAG = "Formant";
@@ -97,8 +107,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int[] maleF1 = {342, 427, 476, 580, 588, 623, 474, 378, 469, 497, 652, 768};
     private int[] maleF2 = {2322, 2034, 2089, 1799, 1952, 1200, 1379, 997, 1122, 910, 997, 1333};
 
-    private int[] referenceF1 = femaleF1;
-    private int[] referenceF2 = femaleF2;
+    private int[] referenceF1;// = femaleF1;
+    private int[] referenceF2;// = femaleF2;
 //    private String[] hints = {"FRONT", "BACK", "MIDDLE", "CLOSE/HIGH", "OPEN/LOW"};
 //    private String hint = "";
 
@@ -117,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.app_bar_nav_drawer);
         setContentView(R.layout.activity_nav_drawer);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -215,6 +224,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mScoreViewModel = ViewModelProviders.of(this)
                 .get(com.luanta.testspeechui.database.ScoreViewModel.class);
 
+        // Initialize preferences
+        mPreferences = getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
+
+        // Restore preferences
+        mUserIdActive = mPreferences.getInt(ACTIVE_USER_KEY, 2);
+        mProfileActive = mPreferences.getInt(ACTIVE_PROFILE_KEY, 2);
+
+    }
+
+    /**
+     * Callback for activity pause. Shared preferences are saved here.
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+        preferencesEditor.putInt(ACTIVE_USER_KEY, mUserIdActive);
+        preferencesEditor.putInt(ACTIVE_PROFILE_KEY, mProfileActive);
+        preferencesEditor.apply();
     }
 
     @Override
@@ -239,18 +268,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.profile_child:
-                referenceF1 = childF1;
-                referenceF2 = childF2;
+                mProfileActive = 1;
                 setMenuItemOptionActive(item);
                 return true;
             case R.id.profile_female:
-                referenceF1 = femaleF1;
-                referenceF2 = femaleF2;
+                mProfileActive = 2;
                 setMenuItemOptionActive(item);
                 return true;
             case R.id.profile_male:
-                referenceF1 = maleF1;
-                referenceF2 = maleF2;
+                mProfileActive = 3;
                 setMenuItemOptionActive(item);
                 return true;
             default:
@@ -376,7 +402,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onDestroy() {
-        mp.release();
+        if(mp != null) mp.release();
         super.onDestroy();
     }
 
@@ -585,6 +611,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // TODO: replace with calculate F1, F2 for progressBar inputs
     private void setCurrentF(ArrayList<Integer> list) {
+        switch (mProfileActive){
+            case 1:
+                referenceF1 = childF1;
+                referenceF2 = childF2;
+            case 2:
+                referenceF1 = femaleF1;
+                referenceF2 = femaleF2;
+            case 3:
+                referenceF1 = maleF1;
+                referenceF2 = maleF2;
+            default:
+                referenceF1 = femaleF1;
+                referenceF2 = femaleF2;
+        }
 
         F1 = list.get(0) * 2;
         F2 = list.get(1) * 2;
@@ -601,8 +641,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         else progF1F2 = scoreF1F2;
 
-        Score score = new Score(userIdActive,picked_vowel+1,progF1F2,
+        Score score = new Score(mUserIdActive,picked_vowel+1,progF1F2,
                 new Timestamp(System.currentTimeMillis()).toString());
+//                LocalDateTime.now().toString());
         mScoreViewModel.insert(score);
 
 //        progF1F2 = 100 - (Math.abs(deltaF1) + Math.abs(deltaF2))/2;
@@ -611,7 +652,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        Log.i(TAG,"F2: " + F2);
 //        Log.i(TAG,"scoreF1F2: " + scoreF1F2);
 //        Log.i(TAG,"progF1F2: " + progF1F2);
-        Log.i(TAG,"referenceF1: " + referenceF1[picked_vowel]);
+//        Log.i(TAG,"referenceF1: " + referenceF1[picked_vowel]);
+//        Log.i(TAG,"mUserIdActive: " + mUserIdActive);
+        Log.i(TAG,"mProfileActive: " + mProfileActive);
 
     }
 
@@ -640,7 +683,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        userIdActive = data.getIntExtra(UsersActivity.EXTRA_REPLY,-1);
+        if(data != null) {
+            mUserIdActive = data.getIntExtra(UsersActivity.EXTRA_REPLY,-1);
+        }
 //        Log.d("_onItemClick","userIdSelected: " + userIdSelected);
     }
 }

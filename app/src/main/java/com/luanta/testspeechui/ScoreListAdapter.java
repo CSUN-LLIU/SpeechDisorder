@@ -34,7 +34,9 @@ public class ScoreListAdapter extends RecyclerView.Adapter<ScoreListAdapter.Scor
             Score current = mScores.get(position);
 //            holder.scoreItemUserId.setText(current.getUserId());
 //            holder.scoreItemVowelId.setText(current.getVowelId());
-            holder.scoreItemScore.setText("Score: " + current.getScore());
+            holder.scoreItemScore.setText("UserId: " + current.getUserId()
+                    +" |VowelId: " + current.getVowelId() + " |Score: " + current.getScore()
+                    + " |Time: " + current.getTimestamp());
 //            holder.scoreItemTimestamp.setText(current.getTimestamp());
         }
         else {
