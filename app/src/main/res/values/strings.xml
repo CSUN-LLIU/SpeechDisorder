@@ -21,4 +21,6 @@
     <string name="history">History</string>
     <string name="users">Users</string>
     <string name="lessons">Lessons</string>
+    <string name="hint_new_name">enter new name</string>
+    <string name="button_user_save">Save</string>
 </resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/editText_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/text_view_style"
+        android:hint="@string/hint_new_name"
+        android:inputType="textAutoComplete"/>
+
+    <Button
+        android:id="@+id/button_save_user"
+        style="@style/buton_style"
+        android:text="@string/button_user_save"/>
+
+</LinearLayout>

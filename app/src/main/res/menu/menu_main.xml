@@ -10,7 +10,6 @@
             android:title="@string/child" />
         <item
             android:id="@+id/profile_female"
-            android:checked="true"
             android:title="@string/female" />
         <item
             android:id="@+id/profile_male"

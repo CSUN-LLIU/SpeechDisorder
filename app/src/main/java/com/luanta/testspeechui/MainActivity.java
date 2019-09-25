@@ -1,6 +1,8 @@
 package com.luanta.testspeechui;
 
 import android.Manifest;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.AudioFormat;
@@ -10,15 +12,20 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Process;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import com.google.android.material.navigation.NavigationView;
+import com.luanta.testspeechui.database.Score;
+import com.luanta.testspeechui.database.ScoreViewModel;
+
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.viewpager.widget.ViewPager;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,13 +36,29 @@ import android.widget.Toast;
 
 import org.jtransforms.fft.FloatFFT_1D;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import in.goodiebag.carouselpicker.CarouselPicker;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
+
+    public static final int SELECT_USER_ACTIVITY_REQUEST_CODE = 1;
+    private int mUserIdActive = 2; // default userId
+    private int mProfileActive = 2; // default user profile
+    // Key for current active user & active profile
+    private final String ACTIVE_USER_KEY = "active_user";
+    private final String ACTIVE_PROFILE_KEY = "active_profile";
+    // Shared preferences object
+    private SharedPreferences mPreferences;
+
+    // Name of shared preferences file
+    private String sharedPrefFile = "com.luanta.testspeechui";
+
+    private ScoreViewModel mScoreViewModel;
 
     private static final String TAG = "Formant";
 
@@ -45,7 +68,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int SAMPLE_RATE = 44100; // Hz or samples per second
     private static final int ENCODING = AudioFormat.ENCODING_PCM_FLOAT;
     private static final int CHANNEL_MASK = AudioFormat.CHANNEL_IN_MONO;
-    private static final int BUFFER_SIZE = 2 * AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_MASK, ENCODING);
+    private static final int BUFFER_SIZE = 2 * AudioRecord.getMinBufferSize(
+            SAMPLE_RATE, CHANNEL_MASK, ENCODING);
     private static final int RECORD_TIME = 1; // in seconds
     public float[] audioData;
 //    public float[] magnitudes;
@@ -85,13 +109,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int[] maleF1 = {342, 427, 476, 580, 588, 623, 474, 378, 469, 497, 652, 768};
     private int[] maleF2 = {2322, 2034, 2089, 1799, 1952, 1200, 1379, 997, 1122, 910, 997, 1333};
 
-    private int[] referenceF1 = femaleF1;
-    private int[] referenceF2 = femaleF2;
+    private int[] referenceF1;// = femaleF1;
+    private int[] referenceF2;// = femaleF2;
 //    private String[] hints = {"FRONT", "BACK", "MIDDLE", "CLOSE/HIGH", "OPEN/LOW"};
 //    private String hint = "";
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(
+            int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case REQUEST_RECORD_AUDIO_PERMISSION:
@@ -105,7 +130,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.app_bar_nav_drawer);
         setContentView(R.layout.activity_nav_drawer);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -178,7 +202,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v11_bk4_inv_c_jaw));
         imageItems.add(new CarouselPicker.DrawableItem(R.drawable.v12_bk5_short_o_clock));
 //Create an adapter
-        CarouselPicker.CarouselViewAdapter imageAdapter = new CarouselPicker.CarouselViewAdapter(this, imageItems, 0);
+        CarouselPicker.CarouselViewAdapter imageAdapter = new CarouselPicker.CarouselViewAdapter(
+                this, imageItems, 0);
 //Set the adapter
         carouselPicker.setAdapter(imageAdapter);
 
@@ -199,6 +224,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+        // Set up the ScoreViewModel
+        mScoreViewModel = ViewModelProviders.of(this)
+                .get(com.luanta.testspeechui.database.ScoreViewModel.class);
+
+        // Initialize preferences
+        mPreferences = getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
+
+        // Restore preferences
+        mUserIdActive = mPreferences.getInt(ACTIVE_USER_KEY, 2);
+        mProfileActive = mPreferences.getInt(ACTIVE_PROFILE_KEY, 2);
+
+    }
+
+    /**
+     * Callback for activity pause. Shared preferences are saved here.
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+        preferencesEditor.putInt(ACTIVE_USER_KEY, mUserIdActive);
+        preferencesEditor.putInt(ACTIVE_PROFILE_KEY, mProfileActive);
+        preferencesEditor.apply();
     }
 
     @Override
@@ -223,18 +272,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.profile_child:
-                referenceF1 = childF1;
-                referenceF2 = childF2;
+                mProfileActive = 1;
                 setMenuItemOptionActive(item);
                 return true;
             case R.id.profile_female:
-                referenceF1 = femaleF1;
-                referenceF2 = femaleF2;
+                mProfileActive = 2;
                 setMenuItemOptionActive(item);
                 return true;
             case R.id.profile_male:
-                referenceF1 = maleF1;
-                referenceF2 = maleF2;
+                mProfileActive = 3;
                 setMenuItemOptionActive(item);
                 return true;
             default:
@@ -315,8 +361,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //            resetProgress();
             Toast.makeText(this, "Recording...Tap to stop", Toast.LENGTH_SHORT).show();
         } else {
-            resetProgress();
             stopRecording();
+            resetProgress();
+            // TODO: temporary add new score after stop recording
+            //TOdo: to make sure only last score was added to database
+            Score score = new Score(mUserIdActive,picked_vowel+1,progF1F2,
+                    new Timestamp(System.currentTimeMillis()).toString());
+            mScoreViewModel.insert(score);
             Toast.makeText(this, "Record has been stopped.", Toast.LENGTH_SHORT).show();
         }
     }
@@ -360,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onDestroy() {
-        mp.release();
+        if(mp != null) mp.release();
         super.onDestroy();
     }
 
@@ -441,14 +492,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 audioRecord.startRecording();
 
+//                int shortsRead = 0;
+
                 while (!isStopButtonPressed) {
                     int shortsRead = 0;
                     audioData = new float[SAMPLE_RATE * RECORD_TIME];
                     while (shortsRead < audioData.length) {
-                        int numberOfIndexs = audioRecord.read(audioData, 0, audioData.length, AudioRecord.READ_NON_BLOCKING);
+                        int numberOfIndexs = audioRecord.read(audioData, 0,
+                                audioData.length, AudioRecord.READ_NON_BLOCKING);
                         shortsRead += numberOfIndexs;
                     }
                     generateGraphData(audioData.clone());
+
+                    /*isFFTComplete = true;
+                    continueParsing = false;*/
+
                     while (!isFFTComplete) ;
                     while (continueParsing) ;
                     isFFTComplete = false;
@@ -464,6 +522,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });//.start();
 
         startThread.start();
+
+//        generateGraphData(audioData.clone());
     }
     /* end public void startRecording() { */
 
@@ -478,14 +538,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 final ArrayList<Integer> peakIndex = calculatePeaks(magnitude, 500);
 //                magnitudes = magnitude;
 //                peakIndexes = peakIndex;
+                displayF1F2((ArrayList<Integer>) peakIndex.clone());
+//                setCurrentF((ArrayList<Integer>) peakIndex.clone()); // TODO: replace with calculate F1, F2 for progressBar inputs
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        //displayF1F2(magnitude.clone(), (ArrayList<Integer>) peakIndex.clone());
-                        displayF1F2((ArrayList<Integer>) peakIndex.clone());
-                    }
-                });
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        //displayF1F2(magnitude.clone(), (ArrayList<Integer>) peakIndex.clone());
+//                        displayF1F2((ArrayList<Integer>) peakIndex.clone());
+//                    }
+//                });
 
                 isFFTComplete = true;
                 continueParsing = false;
@@ -569,6 +631,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // TODO: replace with calculate F1, F2 for progressBar inputs
     private void setCurrentF(ArrayList<Integer> list) {
+        switch (mProfileActive){
+            case 1:
+                referenceF1 = childF1;
+                referenceF2 = childF2;
+                break;
+            case 2:
+                referenceF1 = femaleF1;
+                referenceF2 = femaleF2;
+                break;
+            case 3:
+                referenceF1 = maleF1;
+                referenceF2 = maleF2;
+                break;
+            /*default:
+                referenceF1 = femaleF1;
+                referenceF2 = femaleF2;*/
+        }
 
         F1 = list.get(0) * 2;
         F2 = list.get(1) * 2;
@@ -579,19 +658,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         int scoreF1F2 = 100 - (Math.abs(deltaF1) + Math.abs(deltaF2))/2;
 
+        //TODO: fix: progF1F2 has been calculaled multiple times during recording process
         if(scoreF1F2 < 0) {
             Random rd = new Random();
             progF1F2 = 1 + rd.nextInt(5);
         }
         else progF1F2 = scoreF1F2;
 
+        /*Score score = new Score(mUserIdActive,picked_vowel+1,progF1F2,
+                new Timestamp(System.currentTimeMillis()).toString());
+        mScoreViewModel.insert(score);*/
+
 //        progF1F2 = 100 - (Math.abs(deltaF1) + Math.abs(deltaF2))/2;
 
 //        Log.i(TAG,"F1: " + F1);
 //        Log.i(TAG,"F2: " + F2);
 //        Log.i(TAG,"scoreF1F2: " + scoreF1F2);
-//        Log.i(TAG,"progF1F2: " + progF1F2);
-        Log.i(TAG,"referenceF1: " + referenceF1[picked_vowel]);
+        Log.i(TAG,"progF1F2: " + progF1F2);
+//        Log.i(TAG,"referenceF1: " + referenceF1[picked_vowel]);
+//        Log.i(TAG,"mUserIdActive: " + mUserIdActive);
+//        Log.i(TAG,"mProfileActive: " + mProfileActive);
+//        Log.i(TAG,"mProfileActive: " + referenceF1[0]);
 
     }
 
@@ -599,12 +686,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         // TODO: implement menuItem selected here
         int id = menuItem.getItemId();
-        if(id != 0) {
-            Toast.makeText(this, "onNavigationItemSelected...", Toast.LENGTH_SHORT).show();
+
+        if (id != 0) {
+            if(id == R.id.nav_select_user) {
+                Intent intent = new Intent(this,UsersActivity.class);
+                startActivityForResult(intent,SELECT_USER_ACTIVITY_REQUEST_CODE);
+            }
+            else if(id == R.id.nav_scores) {
+                Intent intent = new Intent(this,ScoresActivity.class);
+                startActivity(intent);
+            }
+            else Toast.makeText(this, "onNavigationItemSelected...", Toast.LENGTH_SHORT).show();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(data != null) {
+            mUserIdActive = data.getIntExtra(UsersActivity.EXTRA_REPLY,-1);
+        }
+//        Log.d("_onItemClick","userIdSelected: " + userIdSelected);
     }
 }
