@@ -20,6 +20,7 @@ import com.luanta.testspeechui.database.UserViewModel;
 import java.util.List;
 
 public class UsersActivity extends AppCompatActivity {
+    public static final String EXTRA_REPLY = "com.luanta.testspeechui.REPLY";
     public static final int NEW_USER_ACTIVITY_REQUEST_CODE = 1;
     private UserViewModel mUserViewModel;
 
@@ -61,8 +62,19 @@ public class UsersActivity extends AppCompatActivity {
         adapterUsers.setOnItemClickListener(new UserListAdapter.ClickListener() {
             @Override
             public void onItemClick(View v, int position) {
-                User user = adapterUsers.getUserAtPosition(position);
-                Log.d("_onItemClick",user.getName());
+                Intent replyIntent = new Intent();
+                if(position != -1) {
+                    User user = adapterUsers.getUserAtPosition(position);
+                    replyIntent.putExtra(EXTRA_REPLY, user.getId());
+//                Log.d("_onItemClick",user.getName());
+                    // Set the result status to indicate success.
+                    setResult(RESULT_OK, replyIntent);
+                }
+                else {
+                    // Couldn't get user position, set the result accordingly.
+                    setResult(RESULT_CANCELED, replyIntent);
+                }
+                finish();
             }
         });
     }

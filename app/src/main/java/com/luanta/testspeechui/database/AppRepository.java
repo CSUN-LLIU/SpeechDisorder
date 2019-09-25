@@ -9,17 +9,21 @@ import java.util.List;
 
 public class AppRepository {
     private UserDao mUserDao;
+    private ScoreDao mScoreDao;
     private LiveData<List<User>> mAllUsers;
+    private LiveData<List<Score>> mAllScores;
 
     public AppRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
         mUserDao = db.userDao();
+        mScoreDao = db.scoreDao();
         mAllUsers = mUserDao.getAllUsers();
+        mAllScores = mScoreDao.getAllScores();
     }
 
     // Add a new user
-    public void insert(User user){
-        new insertAsyncTask(mUserDao).execute(user);
+    public void insertUser(User user){
+        new insertUserAsyncTask(mUserDao).execute(user);
     }
 
     // Delete a user
@@ -37,15 +41,26 @@ public class AppRepository {
         new updateAsyncTask(mUserDao).execute(user);
     }
 
+    // Get all users
     public LiveData<List<User>> getAllUsers(){
         return mAllUsers;
     }
 
+    // Add a new score
+    public void insertScore(Score score) {
+        new insertScoreAsyncTask(mScoreDao).execute(score);
+    }
+
+    // Get all scores
+    public LiveData<List<Score>> getAllScores(){
+        return mAllScores;
+    }
+
     // Add a new user (AsyncTask)
-    private static class insertAsyncTask extends AsyncTask<User,Void,Void> {
+    private static class insertUserAsyncTask extends AsyncTask<User,Void,Void> {
         private UserDao mAsyncUserDao;
 
-        public insertAsyncTask(UserDao userDao) {
+        public insertUserAsyncTask(UserDao userDao) {
             this.mAsyncUserDao = userDao;
         }
 
@@ -97,6 +112,21 @@ public class AppRepository {
         @Override
         protected Void doInBackground(final User... users) {
             mAsyncUserDao.update(users[0]);
+            return null;
+        }
+    }
+
+    // Add a new score (AsyncTask)
+    private static class insertScoreAsyncTask extends AsyncTask<Score,Void,Void> {
+        private ScoreDao mAsyncScoreDao;
+
+        public insertScoreAsyncTask(ScoreDao scoreDao) {
+            this.mAsyncScoreDao = scoreDao;
+        }
+
+        @Override
+        protected Void doInBackground(final Score... scores) {
+            mAsyncScoreDao.insert(scores[0]);
             return null;
         }
     }

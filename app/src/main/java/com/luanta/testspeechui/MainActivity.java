@@ -13,8 +13,13 @@ import android.os.Bundle;
 import android.os.Process;
 import androidx.annotation.NonNull;
 import com.google.android.material.navigation.NavigationView;
+import com.luanta.testspeechui.database.Score;
+import com.luanta.testspeechui.database.ScoreViewModel;
+
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -30,13 +35,19 @@ import android.widget.Toast;
 
 import org.jtransforms.fft.FloatFFT_1D;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import in.goodiebag.carouselpicker.CarouselPicker;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    public static final int SELECT_USER_ACTIVITY_REQUEST_CODE = 1;
+    private int userIdActive;
+    private ScoreViewModel mScoreViewModel;
 
     private static final String TAG = "Formant";
 
@@ -199,6 +210,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             }
         });
+
+        // Set up the ScoreViewModel
+        mScoreViewModel = ViewModelProviders.of(this)
+                .get(com.luanta.testspeechui.database.ScoreViewModel.class);
 
     }
 
@@ -586,6 +601,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         else progF1F2 = scoreF1F2;
 
+        Score score = new Score(userIdActive,picked_vowel+1,progF1F2,
+                new Timestamp(System.currentTimeMillis()).toString());
+        mScoreViewModel.insert(score);
+
 //        progF1F2 = 100 - (Math.abs(deltaF1) + Math.abs(deltaF2))/2;
 
 //        Log.i(TAG,"F1: " + F1);
@@ -600,14 +619,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         // TODO: implement menuItem selected here
         int id = menuItem.getItemId();
-        if(id != 0) {
-//            Toast.makeText(this, "onNavigationItemSelected...", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this,UsersActivity.class);
-            startActivity(intent);
+
+        if (id != 0) {
+            if(id == R.id.nav_select_user) {
+                Intent intent = new Intent(this,UsersActivity.class);
+                startActivityForResult(intent,SELECT_USER_ACTIVITY_REQUEST_CODE);
+            }
+            else if(id == R.id.nav_scores) {
+                Intent intent = new Intent(this,ScoresActivity.class);
+                startActivity(intent);
+            }
+            else Toast.makeText(this, "onNavigationItemSelected...", Toast.LENGTH_SHORT).show();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        userIdActive = data.getIntExtra(UsersActivity.EXTRA_REPLY,-1);
+//        Log.d("_onItemClick","userIdSelected: " + userIdSelected);
     }
 }

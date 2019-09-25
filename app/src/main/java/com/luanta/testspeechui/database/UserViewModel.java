@@ -20,7 +20,7 @@ public class UserViewModel extends AndroidViewModel {
 
     // Add new user
     public void insert(User user){
-        mRepository.insert(user);
+        mRepository.insertUser(user);
     }
 
     // Delete a user

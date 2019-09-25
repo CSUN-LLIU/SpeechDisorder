@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent"
+    tools:context=".ScoresActivity"
+    tools:showIn="@layout/activity_scores">
 
-    <TextView
-        android:id="@+id/textView_userItem"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview_scores"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="8dp"
-        tools:text="placeholder text"
-        style="@style/text_view_style"/>
-
+        android:layout_margin="16dp"
+        tools:listitem="@layout/recyclerview_score_item"/>
 </LinearLayout>
